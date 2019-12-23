@@ -1,2 +1,3 @@
-# pandas_with_django
-Use Python's Pandas features with Django web framework 
+# Django RestFramework with Celery 
+
+Used all RestFramework features and Implement celery for asynchronous task.
