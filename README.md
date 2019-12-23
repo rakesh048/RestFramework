@@ -1,3 +1,3 @@
 # Django RestFramework with Celery 
 
-Used all RestFramework features and Implement celery for asynchronous task.
+Used all RestFramework features and Implemented celery for asynchronous task.
