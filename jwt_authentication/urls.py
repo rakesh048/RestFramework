@@ -6,7 +6,8 @@ from .views import *
 
 urlpatterns = [
     # Your URLs...
+    path('register/', RegisterView.as_view(), name='register_user'),
     path('login/', LoginView.as_view(), name='login_user'),
-    path('refresh_token/', refresh_jwt_token, name='token_refresh'),
-    path('verify_token/', verify_jwt_token, name='verify_refresh'),
+    path('refresh_token/', RefreshToken.as_view(), name='token_refresh'),
+    path('verify_token/', VerifyToken.as_view(), name='verify_refresh'),
 ]

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 
 # Create your views here.
 from django.http import Http404
@@ -8,6 +9,7 @@ from rest_framework import status
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
 
 ################ using API View ###############################
 
@@ -58,16 +60,24 @@ class MultipleFieldLookupMixin(object):
         return obj
 
 class SnippetList(MultipleFieldLookupMixin, generics.RetrieveAPIView):
-    queryset = Snippet.objects.filter(id=2)
+    queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
     lookup_fields = ['pk']
+    permission_classes = [AllowAny]
+
+    #customise response based on our requirements
+
+    def get(self, request, *args, **kwargs):
+        response = super(SnippetList, self).get(request, *args, **kwargs)
+        response.data['custom_value'] = 'list of current snippet'
+        return Response({'data': response.data, 'success': True}, status=status.HTTP_200_OK)
 
 
 class SnippetDetail(mixins.RetrieveModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
 
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
