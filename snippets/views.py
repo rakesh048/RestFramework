@@ -1,7 +1,5 @@
 from django.shortcuts import render
 import json
-
-# Create your views here.
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,6 +8,9 @@ from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
+from rest_framework import mixins
+from django.shortcuts import get_list_or_404, get_object_or_404
+from rest_framework.permissions import IsAdminUser
 
 ################ using API View ###############################
 
@@ -30,17 +31,15 @@ from rest_framework.permissions import AllowAny
 
 ############# using generic view ########################################
 
-from rest_framework.permissions import IsAdminUser
-# class SnippetList(generics.ListCreateAPIView):
-#     queryset = Snippet.objects.all()
-#     serializer_class = SnippetSerializer
-#     permission_classes = [IsAdminUser]
+class SnippetList(mixins.ListModelMixin,generics.GenericAPIView):
+        queryset = Snippet.objects.all()
+        serializer_class = SnippetSerializer
+        permission_classes = [AllowAny]
 
+        def get(self, request, *args, **kwargs):
+            return self.list(request, *args, **kwargs)
 
 ############# using customise generic view ##########################################
-
-from rest_framework import mixins
-from django.shortcuts import get_list_or_404, get_object_or_404
 
 class MultipleFieldLookupMixin(object):
     """
@@ -59,7 +58,7 @@ class MultipleFieldLookupMixin(object):
         self.check_object_permissions(self.request, obj)
         return obj
 
-class SnippetList(MultipleFieldLookupMixin, generics.RetrieveAPIView):
+class SnippetDetail(MultipleFieldLookupMixin, mixins.DestroyModelMixin,generics.RetrieveAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
     lookup_fields = ['pk']
@@ -68,19 +67,9 @@ class SnippetList(MultipleFieldLookupMixin, generics.RetrieveAPIView):
     #customise response based on our requirements
 
     def get(self, request, *args, **kwargs):
-        response = super(SnippetList, self).get(request, *args, **kwargs)
+        response = super(SnippetDetail, self).get(request, *args, **kwargs)
         response.data['custom_value'] = 'list of current snippet'
         return Response({'data': response.data, 'success': True}, status=status.HTTP_200_OK)
-
-
-class SnippetDetail(mixins.RetrieveModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-
-    queryset = Snippet.objects.all()
-    serializer_class = SnippetSerializer
-    permission_classes = [AllowAny]
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
